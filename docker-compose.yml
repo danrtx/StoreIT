@@ -1,0 +1,12 @@
+services:
+  nextjs-docker-upload:
+    build:
+      context: .
+    ports:
+      - "3020:3000"
+    volumes:
+      - .:/app  
+      - /app/node_modules  
+      - uploads:/app/uploads
+    environment:
+      - CHOKIDAR_USEPOLLING=true  
