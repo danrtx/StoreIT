@@ -7,7 +7,6 @@ const Page = async () => {
   return (
     <div className="min-h-screen bg-[#1a1b26]">
       <div className="max-w-6xl mx-auto p-6">
-        <h1>hola</h1>
         <Form />
         <List />
       </div>
