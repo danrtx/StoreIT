@@ -1,8 +1,16 @@
+import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 
-const uploadDir = path.join(process.cwd(), "uploads");
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+}
 
 export async function POST(req: Request) {
   try {
@@ -16,40 +24,16 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    await fs.mkdir(uploadDir, { recursive: true });
+    const result = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
+      cloudinary.uploader.upload_stream({}, (error, result) => {
+        if (error) reject(error);
+        else resolve(result as CloudinaryUploadResult);  
+      }).end(buffer);
+    });
 
-    const filePath = path.join(uploadDir, file.name);
-    await fs.writeFile(filePath, buffer);
-
-    return NextResponse.json({ message: "File uploaded successfully", fileName: file.name });
+    return NextResponse.json({ message: "File uploaded successfully", url: result.secure_url });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
-  }
-}
-export async function GET(req: Request) {
-  try {
-    const url = new URL(req.url);
-    const fileName = url.pathname.split("/").pop(); 
-
-    if (!fileName) {
-      return NextResponse.json({ error: "File not specified" }, { status: 400 });
-    }
-
-    const filePath = path.join(uploadDir, fileName);
-
-    try {
-      const file = await fs.readFile(filePath);
-      return new NextResponse(file, {
-        headers: {
-          "Content-Type": "image/png", 
-        },
-      });
-    } catch {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
-    }
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error retrieving file" }, { status: 500 });
   }
 }
