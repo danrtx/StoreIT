@@ -21,7 +21,6 @@ const List = async () => {
     await deleteFile(fileName);
   };
 
-  // Función para obtener el icono según el tipo de archivo
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "image": return <FiImage className="text-blue-400" />;
@@ -64,7 +63,6 @@ const List = async () => {
                     key={file}
                     className="bg-gray-50 dark:bg-[#282a36] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-100 dark:border-[#44475a] hover:border-blue-200 dark:hover:border-[#6272a4]"
                   >
-                    {/* Vista previa del archivo */}
                     <div className="relative">
                       {type === "image" && (
                         <div className="relative aspect-video bg-gray-100 dark:bg-[#1e1f29]">
@@ -109,7 +107,6 @@ const List = async () => {
                       )}
                     </div>
 
-                    {/* Información del archivo */}
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="text-sm font-medium text-gray-800 dark:text-[#f8f8f2] truncate" title={fileName}>
