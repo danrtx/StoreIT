@@ -1,42 +1,29 @@
 "use client";
-
+import { upload } from "@/app/actions";
+import { ALLOWED_TYPES, MAX_FILE_SIZE } from "@/app/constants";
+import { formatFileSize } from "@/app/utils";
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotification, Notification } from "./Notification"; 
-import { formatFileSize } from "@/app/utils";
-import { ALLOWED_TYPES, MAX_FILE_SIZE } from "@/app/constants";
 
-// Agrega el código para enviar el archivo a tu API de Next.js
 const Form = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { notification, showNotification, hideNotification } = useNotification();
+  const { notification, showNotification, hideNotification } = useNotification(); 
 
   const handleUpload = async (formData: FormData) => {
     setIsUploading(true);
-    const file = formData.get("file");
-
-    if (file instanceof File) {
-      try {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          showNotification('success', 'File uploaded successfully');
-          console.log('File URL:', data.url); // URL del archivo cargado
-        } else {
-          showNotification('error', data.error || 'Failed to upload file');
-        }
-      } catch (error) {
-        showNotification('error', 'An error occurred while uploading the file');
-      }
+    const result = await upload(formData);
+    if (!result.success) {
+      setErrorMessage(result.message);
+      showNotification('error', result.message || 'Failed to upload file');
+    } else {
+      setErrorMessage(null);
+      setFileName(null);
+      showNotification('success', 'File uploaded successfully'); 
     }
     setIsUploading(false);
   };
@@ -80,6 +67,7 @@ const Form = () => {
 
   return (
     <>
+      {/* Añadimos el componente de notificación */}
       <Notification 
         type={notification.type} 
         message={notification.message} 
@@ -93,11 +81,7 @@ const Form = () => {
         className="p-8 rounded-xl bg-[#282a36] mb-8 border border-[#44475a] shadow-lg"
       >
         <h2 className="text-2xl font-bold mb-6 text-[#f8f8f2] tracking-wide">Upload Files</h2>
-        <form onSubmit={(e) => { 
-          e.preventDefault();
-          const formData = new FormData(e.target as HTMLFormElement);
-          handleUpload(formData);
-        }}>
+        <form action={handleUpload}>
           <div className="space-y-6">
             <motion.div 
               className={`border-3 border-dashed rounded-xl p-10 flex flex-col items-center justify-center transition-colors duration-300 ${isDragging ? 'border-[#ff79c6] bg-[#ff79c6]/10' : 'border-[#44475a] bg-[#1e1f29]'}`}
@@ -184,7 +168,7 @@ const Form = () => {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                   </svg>
-                  <span>Submit</span>
+                  <span>Upload File</span>
                 </>
               )}
             </motion.button>
@@ -195,4 +179,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export { Form };

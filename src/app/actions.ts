@@ -1,8 +1,10 @@
 "use server";
 
-import { cloudinary } from "@/app/api/download/[fileName]/route"; 
-import { ALLOWED_TYPES, MAX_FILE_SIZE } from "@/app/constants";
+import { ALLOWED_TYPES, MAX_FILE_SIZE, UPLOAD_DIR } from "@/app/constants";
 import { isAllowedMimeType, sanitizeFileName } from "@/app/utils";
+import fs from "fs/promises";
+import { revalidatePath } from "next/cache";
+import path from "path";
 
 type UploadResult = {
   success: boolean;
@@ -36,24 +38,41 @@ const upload = async (formData: FormData): Promise<UploadResult> => {
       };
     }
 
-    // Subir el archivo a Cloudinary
-    const result = await new Promise<any>(async (resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { resource_type: "auto" }, // Permite manejar imágenes, video, audio, etc.
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        }
-      ).end(Buffer.from(await file.arrayBuffer()));
-    });
+    const originalExtension = path.extname(file.name).toLowerCase();
+    const allowedExtensions = ALLOWED_TYPES[file.type];
+
+    if (!allowedExtensions.includes(originalExtension)) {
+      return {
+        success: false,
+        message: `Invalid file extension. Expected: ${allowedExtensions.join(
+          ", "
+        )}`,
+      };
+    }
+
+    const timestamp = Date.now();
+    const safeFileName = `${timestamp}-${sanitizeFileName(file.name)}`;
+    const filePath = path.join(UPLOAD_DIR, safeFileName);
+
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    await fs.writeFile(filePath, buffer);
+
+    const stats = await fs.stat(filePath);
+    if (stats.size !== file.size) {
+      await fs.unlink(filePath);
+      return { success: false, message: "File upload verification failed" };
+    }
+
+    revalidatePath("/");
 
     return {
       success: true,
       message: "File uploaded successfully",
-      fileName: result.public_id, // Usamos el public_id de Cloudinary
+      fileName: safeFileName,
     };
   } catch (error) {
     return {
@@ -66,8 +85,9 @@ const upload = async (formData: FormData): Promise<UploadResult> => {
 
 const deleteFile = async (fileName: string) => {
   try {
-    // Usamos el public_id de Cloudinary para eliminar el archivo
-    await cloudinary.uploader.destroy(fileName); // fileName debe ser el public_id de Cloudinary
+    const filePath = path.join("uploads", fileName);
+    await fs.unlink(filePath);
+    revalidatePath("/");
   } catch (error) {
     console.error("Delete error:", error);
   }

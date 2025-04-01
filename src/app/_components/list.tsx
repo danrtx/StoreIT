@@ -1,15 +1,17 @@
 import { deleteFile } from "@/app/actions";
 import { groupFilesByType } from "@/app/utils";
+import fs from "fs/promises";
+import Image from "next/image";
 import { FiFile, FiImage, FiVideo, FiMusic, FiFileText, FiDownload, FiTrash2, FiFolder } from 'react-icons/fi';
 
 const List = async () => {
-  let files: string[] = []; // Obtenemos los archivos de Cloudinary de alguna manera, aquí es un ejemplo simulado
+  let files: string[] = [];
 
   try {
-    // Aquí deberías hacer una solicitud a Cloudinary para obtener los archivos, simulado por un arreglo de ejemplo
-    files = ["image-xyz", "video-abc", "audio-def"];
+    files = await fs.readdir("uploads");
   } catch (error) {
     console.error(error);
+    await fs.mkdir("uploads", { recursive: true });
   }
 
   const groupedFiles = groupFilesByType(files);
@@ -54,6 +56,7 @@ const List = async () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {typeFiles.map((file) => {
                 const fileName = file.substring(file.indexOf("-") + 1);
+                const fileDate = new Date(parseInt(file.split("-")[0]));
                 
                 return (
                   <div
@@ -63,10 +66,12 @@ const List = async () => {
                     <div className="relative">
                       {type === "image" && (
                         <div className="relative aspect-video bg-gray-100 dark:bg-[#1e1f29]">
-                          <img
-                            src={`https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${file}.jpg`} // Suponiendo que es una imagen
+                          <Image
+                            src={`/api/download/${file}`}
                             alt={fileName}
+                            fill
                             className="object-contain"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         </div>
                       )}
@@ -74,7 +79,8 @@ const List = async () => {
                         <video
                           className="w-full aspect-video bg-gray-100 dark:bg-[#1e1f29]"
                           controls
-                          src={`https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/video/upload/${file}.mp4`} // Suponiendo que es un video
+                          src={`/api/download/${file}`}
+                          poster="/api/placeholder/400/225"
                         />
                       )}
                       {type === "audio" && (
@@ -85,7 +91,8 @@ const List = async () => {
                           <audio
                             className="w-full mb-2"
                             controls
-                            src={`https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/audio/upload/${file}.mp3`} // Suponiendo que es un audio
+                            src={`/api/download/${file}`}
+                            preload="none"
                           />
                         </div>
                       )}
@@ -106,22 +113,38 @@ const List = async () => {
                           {fileName}
                         </h3>
                       </div>
-
+                      <p className="text-xs text-gray-500 dark:text-[#6272a4] mb-3">
+                        {fileDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </p>
+                      
                       {/* Acciones */}
                       <div className="flex justify-between items-center">
-                        <a
-                          href={`https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/upload/${file}`}
-                          className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-[#bd93f9] hover:text-blue-800 dark:hover:text-[#ff79c6] font-medium"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <FiDownload size={14} />
-                          Download
-                        </a>
+                        {(type === "document" || type === "other") ? (
+                          <a
+                            href={`/api/download/${file}`}
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-[#bd93f9] hover:text-blue-800 dark:hover:text-[#ff79c6] font-medium"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <FiDownload size={14} />
+                            Download
+                          </a>
+                        ) : (
+                          <a
+                            href={`/api/download/${file}`}
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-[#bd93f9] hover:text-blue-800 dark:hover:text-[#ff79c6] font-medium"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <FiDownload size={14} />
+                            Download
+                          </a>
+                        )}
                         <form action={handleDelete.bind(null, file)}>
                           <button
                             type="submit"
-                            className="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
+                            className="inline-flex items-center gap-1 text-xs text-red-600 dark:text-[#ff5555] hover:text-red-800 dark:hover:text-red-400 font-medium"
+                            title="Delete file"
                           >
                             <FiTrash2 size={14} />
                             Delete
@@ -136,12 +159,16 @@ const List = async () => {
           </div>
         ))
       ) : (
-        <div className="text-center text-lg text-gray-600 dark:text-gray-400">
-          No files uploaded yet.
+        <div className="flex flex-col items-center justify-center py-16 bg-gray-50 dark:bg-[#1e1f29] rounded-xl border border-gray-200 dark:border-[#44475a]">
+          <div className="w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
+            <FiFolder className="text-3xl text-blue-500 dark:text-blue-400" />
+          </div>
+          <p className="text-gray-500 dark:text-[#6272a4] font-medium mb-2">No files uploaded yet</p>
+          <p className="text-sm text-gray-400 dark:text-[#6272a4]/80">Upload files to see them here</p>
         </div>
       )}
     </div>
   );
 };
 
-export default List;
+export { List };
