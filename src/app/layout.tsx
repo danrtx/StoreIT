@@ -1,8 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import { NavBar } from "@/app/_components/NavBar"; 
+import { NavBar } from "@/app/_components/NavBar";
+import { WelcomeOverlay } from "@/app/_components/WelcomeOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +16,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const metadata: Metadata = {
-  title: "File Manager",
+export const metadata: Metadata = {
+  title: "Store It",
 };
 
 type LayoutProps = {
@@ -28,12 +30,12 @@ const Layout = ({ children }: LayoutProps) => {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NavBar categories={undefined} /> 
+        <WelcomeOverlay />
+        <NavBar categories={['Mis archivos', 'Compartidos', 'Recientes', 'Favoritos']} /> 
         <main>{children}</main>
       </body>
     </html>
   );
 };
 
-export { metadata };
 export default Layout;
