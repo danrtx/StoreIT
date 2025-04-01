@@ -8,7 +8,6 @@ export const NavBar = ({ categories }: NavBarProps) => {
   return (
     <header className="bg-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-800">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-        {/* Logo y título */}
         <span className="flex items-center space-x-3">
           <span className="bg-purple-400 w-10 h-10 rounded-lg flex items-center justify-center shadow-md">
             <FiHardDrive className="text-gray-900 text-xl" />
@@ -19,7 +18,6 @@ export const NavBar = ({ categories }: NavBarProps) => {
           </span>
         </span>
 
-        {/* Navegación principal */}
         <nav className="hidden md:block">
           <ul className="flex space-x-8">
             {(categories ?? []).map((category) => (
@@ -33,7 +31,6 @@ export const NavBar = ({ categories }: NavBarProps) => {
           </ul>
         </nav>
 
-        {/* Área para acciones relacionadas con archivos */}
         <section className="flex items-center space-x-3">
           <button className="p-2 rounded-full text-gray-200 hover:bg-gray-800 transition-colors duration-200">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
