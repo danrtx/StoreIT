@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { put, list } from '@vercel/blob';
+import fs from "fs/promises";
+import path from "path";
+
+const uploadDir = path.join(process.cwd(), "uploads");
 
 export async function POST(req: Request) {
   try {
@@ -10,39 +13,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Subir a Vercel Blob
-    const { url } = await put(file.name, file, {
-      access: 'public',
-    });
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
-    return NextResponse.json({ 
-      message: "File uploaded successfully", 
-      fileName: file.name,
-      url: url 
-    });
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    const filePath = path.join(uploadDir, file.name);
+    await fs.writeFile(filePath, buffer);
+
+    return NextResponse.json({ message: "File uploaded successfully", fileName: file.name });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
   }
 }
-
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const fileName = url.searchParams.get('file') || url.pathname.split("/").pop(); 
+    const fileName = url.pathname.split("/").pop(); 
 
-    if (!fileName || fileName === "api") {
-      const { blobs } = await list();
-      return NextResponse.json({ files: blobs });
+    if (!fileName) {
+      return NextResponse.json({ error: "File not specified" }, { status: 400 });
     }
 
-    const { blobs } = await list({ prefix: fileName });
-    
-    if (blobs.length === 0) {
+    const filePath = path.join(uploadDir, fileName);
+
+    try {
+      const file = await fs.readFile(filePath);
+      return new NextResponse(file, {
+        headers: {
+          "Content-Type": "image/png", 
+        },
+      });
+    } catch {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
-    
-    return NextResponse.redirect(blobs[0].url);
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Error retrieving file" }, { status: 500 });

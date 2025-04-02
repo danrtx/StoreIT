@@ -1,4 +1,4 @@
-import { FiHardDrive } from 'react-icons/fi';
+import { FiHardDrive, FiCloudSnow, FiStar } from 'react-icons/fi';
 
 interface NavBarProps {
   categories: string[] | undefined;
@@ -31,17 +31,16 @@ export const NavBar = ({ categories }: NavBarProps) => {
           </ul>
         </nav>
 
-        <section className="flex items-center space-x-3">
-          <button className="p-2 rounded-full text-gray-200 hover:bg-gray-800 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-          <button className="p-2 rounded-full text-gray-200 hover:bg-gray-800 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
+        <section className="flex items-center space-x-4">
+          <span className="flex items-center text-gray-400 text-sm">
+            <FiCloudSnow className="mr-1 text-purple-300" />
+            <span className="hidden sm:inline">12.4 GB disponibles</span>
+          </span>
+          
+          <span className="bg-gradient-to-r from-purple-600 to-blue-500 rounded-full py-1.5 px-3 flex items-center text-white text-sm font-medium shadow-lg">
+            <FiStar className="mr-1" />
+            <span className="hidden sm:inline">Pro</span>
+          </span>
         </section>
       </section>
     </header>
