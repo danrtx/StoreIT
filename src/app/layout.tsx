@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import { NavBar } from "@/app/_components/NavBar";
+import NavBar from "@/app/_components/NavBar";
 import { WelcomeOverlay } from "@/app/_components/WelcomeOverlay";
 
 const geistSans = Geist({
@@ -30,7 +30,7 @@ const Layout = ({ children }: LayoutProps) => {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <WelcomeOverlay />
-        <NavBar categories={['Mis archivos', 'Compartidos', 'Recientes', 'Favoritos']} /> 
+        <NavBar /> 
         <main>{children}</main>
       </body>
     </html>

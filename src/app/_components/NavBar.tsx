@@ -1,48 +1,37 @@
-import { FiHardDrive, FiCloudSnow, FiStar } from 'react-icons/fi';
+import React from 'react';
+import { FiHardDrive } from 'react-icons/fi';
 
-interface NavBarProps {
-  categories: string[] | undefined;
-}
-
-export const NavBar = ({ categories }: NavBarProps) => {
+// Exportación por defecto en lugar de exportación nombrada
+export default function NavBar() {
   return (
-    <header className="bg-gray-900 shadow-md sticky top-0 z-50 border-b border-gray-800">
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-        <span className="flex items-center space-x-3">
-          <span className="bg-purple-400 w-10 h-10 rounded-lg flex items-center justify-center shadow-md">
-            <FiHardDrive className="text-gray-900 text-xl" />
-          </span>
-          <span>
-            <h1 className="text-2xl font-bold text-white">Store It!</h1>
-            <p className="text-xs text-purple-300">Tu gestor de archivos</p>
-          </span>
+    <header className="bg-gray-900 flex items-center justify-between px-6 py-3 shadow-md border-b border-gray-800">
+      {/* Logo y título */}
+      <div className="flex items-center space-x-3">
+        <span className="bg-purple-400 w-10 h-10 rounded-lg flex items-center justify-center shadow-md">
+          <FiHardDrive className="text-gray-900 text-xl" />
         </span>
-
-        <nav className="hidden md:block">
-          <ul className="flex space-x-8">
-            {(categories ?? []).map((category) => (
-              <li key={category} className="relative group">
-                <a className="text-gray-200 font-medium hover:text-purple-300 transition-colors duration-200">
-                  {category}
-                </a>
-                <span className="absolute h-0.5 w-0 bg-purple-400 bottom-0 left-0 group-hover:w-full transition-all duration-300"></span>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <section className="flex items-center space-x-4">
-          <span className="flex items-center text-gray-400 text-sm">
-            <FiCloudSnow className="mr-1 text-purple-300" />
-            <span className="hidden sm:inline">12.4 GB disponibles</span>
-          </span>
-          
-          <span className="bg-gradient-to-r from-purple-600 to-blue-500 rounded-full py-1.5 px-3 flex items-center text-white text-sm font-medium shadow-lg">
-            <FiStar className="mr-1" />
-            <span className="hidden sm:inline">Pro</span>
-          </span>
-        </section>
-      </section>
+        <span>
+          <h1 className="text-xl font-bold text-white">Store It!</h1>
+          <p className="text-xs text-purple-300">Tu gestor de archivos</p>
+        </span>
+      </div>
+      
+      {/* Elementos decorativos en el centro */}
+      <div className="hidden md:flex items-center space-x-4">
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500"></div>
+        <div className="h-3 w-3 rounded-full bg-purple-400"></div>
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+      </div>
+      
+      {/* Elementos decorativos a la derecha */}
+      <div className="flex items-center space-x-2">
+        <span className="px-3 py-1 text-xs font-medium text-purple-200 border border-purple-500 rounded-md">
+          12.4 GB
+        </span>
+        <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div className="w-3/4 h-full bg-gradient-to-r from-purple-400 to-blue-500"></div>
+        </div>
+      </div>
     </header>
   );
-};
+}
